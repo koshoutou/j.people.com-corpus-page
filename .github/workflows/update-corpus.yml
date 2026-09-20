@@ -1,0 +1,54 @@
+name: 自动更新语料库
+
+on:
+  schedule:
+    # 每 3 天运行一次（UTC 时间 00:00）
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:  # 支持手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: 设置 Python 环境
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: 安装依赖
+      run: |
+        pip install --upgrade pip
+        pip install requests lxml pandas openpyxl
+
+    - name: 运行增量更新并导出全部格式
+      run: |
+        python update_latest_corpus.py
+
+    - name: 检查是否有更新
+      id: git-check
+      run: |
+        git add -A data/
+        git diff --cached --quiet || echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+    - name: 提交并推送更新
+      if: steps.git-check.outputs.has_changes == 'true'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git pull --rebase origin "${{ github.ref_name }}" || true
+        git commit -m "chore: 自动更新语料库数据与导出格式 [skip ci]"
+        git push
+
+    - name: 无更新时输出日志
+      if: steps.git-check.outputs.has_changes == 'false'
+      run: echo "语料库已是最新，无需更新"
