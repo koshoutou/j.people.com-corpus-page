@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# 大型数据文件（通过 GitHub Releases 管理）
+# 注意：TMX/XML/XLSX 等导出格式需提交到仓库，不再忽略
+people_cn_corpus_comprehensive_*/
+
+# 日志文件（爬取日志记录不入库）
+*.log
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 本地测试数据（可选）
+# data/corpus.json
+# data/pages/
